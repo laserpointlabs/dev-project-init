@@ -1,38 +1,38 @@
 #!/bin/bash
 
-# DADMS MCP Memory Backup Script
-# Backs up Neo4j memory database with timestamps
+# Dev Project Initializer - Memory Backup Script
+# Backs up Neo4j development memory database with timestamps
 
 set -e
 
-BACKUP_DIR="./backups/mcp-memory"
+BACKUP_DIR="./backups/dev-memory"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-BACKUP_FILE="mcp-memory-backup-${TIMESTAMP}.cypher"
+BACKUP_FILE="dev-memory-backup-${TIMESTAMP}.cypher"
 
 # Create backup directory if it doesn't exist
 mkdir -p "$BACKUP_DIR"
 
 echo "🔄 Starting MCP memory backup..."
 
-# Check if Neo4j memory container is running  
-if ! docker ps | grep -q "mcp-neo4j-memory"; then
-    echo "❌ Error: mcp-neo4j-memory container is not running"
+# Check if dev memory container is running  
+if ! docker ps | grep -q "dev-project-memory"; then
+    echo "❌ Error: dev-project-memory container is not running"
     echo "   Start it with: docker-compose up -d"
     exit 1
 fi
 
 # Create backup directory inside container (in the import directory where APOC can write)
-docker exec mcp-neo4j-memory mkdir -p /var/lib/neo4j/import
+docker exec dev-project-memory mkdir -p /var/lib/neo4j/import
 
 # Export all data from Neo4j memory instance
-docker exec mcp-neo4j-memory cypher-shell -u neo4j -p memorypassword \
+docker exec dev-project-memory cypher-shell -u neo4j -p devmemorypass \
     "CALL apoc.export.cypher.all('backup.cypher', {})" || {
     echo "❌ Failed to create backup"
     exit 1
 }
 
 # Copy backup file from container
-docker cp mcp-neo4j-memory:/var/lib/neo4j/import/backup.cypher "${BACKUP_DIR}/${BACKUP_FILE}"
+docker cp dev-project-memory:/var/lib/neo4j/import/backup.cypher "${BACKUP_DIR}/${BACKUP_FILE}"
 
 # Compress the backup
 gzip "${BACKUP_DIR}/${BACKUP_FILE}"
@@ -43,7 +43,7 @@ echo "📊 Backup size: $(du -h "${BACKUP_DIR}/${BACKUP_FILE}.gz" | cut -f1)"
 # Keep only last 7 backups
 echo "🧹 Cleaning old backups (keeping last 7)..."
 cd "$BACKUP_DIR"
-ls -t mcp-memory-backup-*.cypher.gz 2>/dev/null | tail -n +8 | xargs -r rm
-echo "📁 Total backups: $(ls -1 mcp-memory-backup-*.cypher.gz 2>/dev/null | wc -l)"
+ls -t dev-memory-backup-*.cypher.gz 2>/dev/null | tail -n +8 | xargs -r rm
+echo "📁 Total backups: $(ls -1 dev-memory-backup-*.cypher.gz 2>/dev/null | wc -l)"
 
-echo "🎉 MCP memory backup process completed successfully!"
+echo "🎉 Dev memory backup process completed successfully!"

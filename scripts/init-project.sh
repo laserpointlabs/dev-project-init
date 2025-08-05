@@ -56,24 +56,24 @@ usage() {
 }
 
 check_memory_service() {
-    print_step "Checking MCP memory service..."
+    print_step "Checking development memory service..."
     
     # Check if container is running
-    if ! docker ps | grep -q "mcp-neo4j-memory"; then
-        print_error "MCP memory service is not running"
+    if ! docker ps | grep -q "dev-project-memory"; then
+        print_error "Development memory service is not running"
         echo "Please start it first:"
-        echo "  cd /path/to/mcp-memory-infrastructure"
+        echo "  cd /path/to/dev-project-init"
         echo "  docker-compose up -d"
         exit 1
     fi
     
     # Check if service is responding
-    if ! curl -s http://localhost:7475 > /dev/null; then
-        print_error "MCP memory service is not responding on port 7475"
+    if ! curl -s http://localhost:9475 > /dev/null; then
+        print_error "Development memory service is not responding on port 9475"
         exit 1
     fi
     
-    print_success "MCP memory service is running and accessible"
+    print_success "Development memory service is running and accessible"
 }
 
 create_cursor_config() {
@@ -97,13 +97,13 @@ create_cursor_config() {
             print_success "neo4j-memory already configured in mcp.json"
             print_step "Verifying configuration points to centralized service..."
             
-            # Verify the URL points to localhost:7688
-            if grep -q 'neo4j://localhost:7688' "$mcp_file"; then
-                print_success "Configuration correctly points to centralized memory service"
+            # Verify the URL points to localhost:9688 (unusual port)
+            if grep -q 'neo4j://localhost:9688' "$mcp_file"; then
+                print_success "Configuration correctly points to development memory service"
             else
-                print_warning "Updating neo4j-memory URL to point to centralized service"
+                print_warning "Updating neo4j-memory URL to point to development service (port 9688)"
                 # Update the URL using sed
-                sed -i 's|"neo4j://[^"]*"|"neo4j://localhost:7688"|g' "$mcp_file"
+                sed -i 's|"neo4j://[^"]*"|"neo4j://localhost:9688"|g' "$mcp_file"
             fi
         else
             print_step "Adding neo4j-memory configuration to existing mcp.json"
@@ -116,11 +116,11 @@ create_cursor_config() {
                     "args": [
                         "mcp-neo4j-memory",
                         "--db-url",
-                        "neo4j://localhost:7688",
+                        "neo4j://localhost:9688",
                         "--username",
                         "neo4j",
                         "--password",
-                        "memorypassword"
+                        "devmemorypass"
                     ]
                 }' "$mcp_file" > "$mcp_file.tmp" && mv "$mcp_file.tmp" "$mcp_file"
             else
@@ -131,11 +131,11 @@ create_cursor_config() {
                 echo '    "args": ['
                 echo '        "mcp-neo4j-memory",'
                 echo '        "--db-url",'
-                echo '        "neo4j://localhost:7688",'
+                echo '        "neo4j://localhost:9688",'
                 echo '        "--username",'
                 echo '        "neo4j",'
                 echo '        "--password",'
-                echo '        "memorypassword"'
+                echo '        "devmemorypass"'
                 echo '    ]'
                 echo '}'
             fi
@@ -146,18 +146,18 @@ create_cursor_config() {
         cat > "$mcp_file" << EOF
 {
     "\$schema": "https://json.schemastore.org/mcp.json",
-    "description": "${PROJECT_NAME} Development MCP Server Configuration with Centralized Memory",
+    "description": "${PROJECT_NAME} Development MCP Server Configuration with Dev Project Initializer",
     "mcpServers": {
         "neo4j-memory": {
             "command": "uvx",
             "args": [
                 "mcp-neo4j-memory",
                 "--db-url",
-                "neo4j://localhost:7688",
+                "neo4j://localhost:9688",
                 "--username",
                 "neo4j",
                 "--password",
-                "memorypassword"
+                "devmemorypass"
             ]
         }
     }
@@ -219,13 +219,13 @@ EOF
 }
 
 test_connection() {
-    print_step "Testing MCP memory connection..."
+    print_step "Testing development memory connection..."
     
     # Simple connection test
-    if nc -z localhost 7688 2>/dev/null; then
-        print_success "Successfully connected to MCP memory service (port 7688)"
+    if nc -z localhost 9688 2>/dev/null; then
+        print_success "Successfully connected to development memory service (port 9688)"
     else
-        print_warning "Could not connect to MCP memory service"
+        print_warning "Could not connect to development memory service"
         echo "This may be normal - the connection will be established when Cursor starts"
     fi
 }
@@ -234,9 +234,9 @@ main() {
     print_header
     
     # Parse arguments
-    if [ $# -lt 1 ]; then
+    if [ $# -lt 1 ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
         usage
-        exit 1
+        exit 0
     fi
     
     PROJECT_NAME="$1"
@@ -269,13 +269,15 @@ main() {
     echo "📋 Next steps:"
     echo "1. 🔄 Restart Cursor to load the new MCP configuration"
     echo "2. 🧠 Test memory by asking the AI to remember something about ${PROJECT_NAME}"
-    echo "3. 🔍 Check memory status: cd /path/to/mcp-memory-infrastructure && ./scripts/check_memory.sh"
-    echo "4. 📊 View memories: http://localhost:7475 (neo4j/memorypassword)"
+    echo "3. 🔍 Check memory status: cd /path/to/dev-project-init && ./scripts/check_memory.sh"
+    echo "4. 📊 View memories: http://localhost:9475 (neo4j/devmemorypass)"
     echo ""
-    echo "🌐 Memory service URLs:"
-    echo "   • Neo4j Web UI: http://localhost:7475"
-    echo "   • Bolt API: neo4j://localhost:7688"
+    echo "🌐 Development memory service URLs:"
+    echo "   • Neo4j Web UI: http://localhost:9475 (unusual port)"
+    echo "   • Bolt API: neo4j://localhost:9688 (unusual port)"
     echo "   • Project ID: ${PROJECT_NAME}"
+    echo ""
+    echo "💡 Note: Using unusual ports (9xxx) to avoid conflicts with application ports"
 }
 
 # Run main function

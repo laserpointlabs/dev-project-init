@@ -1,4 +1,4 @@
-# MCP Memory Infrastructure .gitignore
+# Dev Project Initializer .gitignore
 
 # System files
 .DS_Store
@@ -9,14 +9,18 @@ import/*.cypher
 .env
 
 # Backup files (keep structure, not content)
+backups/dev-memory/*
+!backups/dev-memory/.gitkeep
 backups/mcp-memory/*
 !backups/mcp-memory/.gitkeep
 
 # Local configuration
 config/local-*
+templates/local-*
 
 # Docker volumes
 data/
 
 # Temporary files
 *.tmp
+*.backup.*

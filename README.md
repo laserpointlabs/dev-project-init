@@ -1,8 +1,23 @@
-# MCP Memory Infrastructure
+# Dev Project Initializer
 
-**Centralized Neo4j memory service for all development projects**
+**Universal project initialization toolkit with development infrastructure**
 
-This repository provides a **centralized MCP (Model Context Protocol) memory infrastructure** that serves as the persistent memory system for all your development projects. Instead of each project having its own memory database, this centralized service allows DADMS, ProcOS, and future projects to share and access development context through Cursor's MCP integration.
+This repository provides a **comprehensive project initialization system** that sets up new development projects with standardized configurations, development tools, and infrastructure. Following best practices from frameworks like Create React App and Angular CLI, this toolkit ensures consistent development environments across all your projects.
+
+## 🎯 **Why This Approach?**
+
+**Best Practice Pattern**: Major frameworks use initialization toolkits:
+- **Create React App** - React project scaffolding
+- **Angular CLI** - Angular project initialization  
+- **Rails new** - Ruby on Rails setup
+- **Yeoman generators** - Web development scaffolding
+
+**Our toolkit** extends this pattern for **any project type** with:
+- ✅ **Standardized IDE configurations** (Cursor, VSCode)
+- ✅ **Development infrastructure** (Memory, tools, backups)
+- ✅ **Project templates** (React, Node.js, Python, ProcOS, etc.)
+- ✅ **Port management** (Unusual ports to avoid conflicts)
+- ✅ **Team consistency** (Same setup across all developers)
 
 ## 🎯 **What This Provides**
 
@@ -51,7 +66,87 @@ docker-compose up -d
 
 ## 🏗️ **Architecture**
 
-### **Centralized MCP Memory Solution**
+### **Universal Project Initializer System**
+
+```mermaid
+graph TB
+    subgraph "Universal Project Initializer"
+        subgraph "🎯 Project Templates"
+            REACT[React/TypeScript Template]
+            NODE[Node.js/Express Template]
+            PYTHON[Python/FastAPI Template]
+            PROCOS[ProcOS Template]
+            GENERIC[Generic Template]
+        end
+        
+        subgraph "⚙️ Development Infrastructure"
+            NEO[Neo4j Memory Service<br/>Port 9475/9688]
+            TOOLS[Development Tools<br/>Port 9xxx Range]
+            BACKUP[Backup System]
+        end
+        
+        subgraph "📋 Standard Configurations"
+            CURSOR[.cursor/mcp.json<br/>.cursor/rules/]
+            VSCODE[.vscode/settings.json<br/>.vscode/extensions.json]
+            COPILOT[copilot-instructions.md]
+            RULES[.cursorrules]
+            GIT[.gitignore<br/>.gitattributes]
+            ENV[.env.example<br/>docker-compose.yml]
+        end
+        
+        subgraph "🚀 Initialization Process"
+            DETECT[Detect Project Type]
+            TEMPLATE[Apply Template]
+            CONFIG[Configure Development Tools]
+            CONNECT[Connect to Infrastructure]
+            TEST[Validate Setup]
+        end
+        
+        DETECT --> TEMPLATE
+        TEMPLATE --> CONFIG
+        CONFIG --> CONNECT
+        CONNECT --> TEST
+        
+        REACT -.-> TEMPLATE
+        NODE -.-> TEMPLATE
+        PYTHON -.-> TEMPLATE
+        PROCOS -.-> TEMPLATE
+        GENERIC -.-> TEMPLATE
+        
+        CONFIG --> CURSOR
+        CONFIG --> VSCODE
+        CONFIG --> COPILOT
+        CONFIG --> RULES
+        CONFIG --> GIT
+        CONFIG --> ENV
+        
+        CONNECT --> NEO
+        CONNECT --> TOOLS
+        CONNECT --> BACKUP
+    end
+    
+    classDef template fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef infra fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef config fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef process fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    
+    class REACT,NODE,PYTHON,PROCOS,GENERIC template
+    class NEO,TOOLS,BACKUP infra
+    class CURSOR,VSCODE,COPILOT,RULES,GIT,ENV config
+    class DETECT,TEMPLATE,CONFIG,CONNECT,TEST process
+```
+
+### **Port Management Strategy**
+
+Development infrastructure uses **unusual ports** (9xxx range) to avoid conflicts with application ports (3000-8000):
+
+| Service | Production Port | **Development Port** | Purpose |
+|---------|-----------------|---------------------|---------|
+| Neo4j Web UI | 7474 | **9475** | Memory database interface |
+| Neo4j Bolt | 7687 | **9688** | MCP memory connection |
+| Development Tools | Various | **9100-9999** | Isolated development services |
+
+### **Legacy Memory Integration**
 
 ```mermaid
 graph TB
@@ -144,24 +239,68 @@ graph LR
     class META,PROJ,CAT,TIME,TAGS,CONTENT metadata
 ```
 
+## 🎯 **Project Templates & Types**
+
+The initialization system supports multiple project types with standardized configurations:
+
+### **Available Templates**
+
+| Template | Description | Includes |
+|----------|-------------|----------|
+| **React/TypeScript** | Modern React application | Vite, TypeScript, ESLint, Prettier |
+| **Node.js/Express** | Backend API server | Express, TypeScript, Jest, Nodemon |
+| **Python/FastAPI** | Python web API | FastAPI, Pydantic, pytest, uvicorn |
+| **ProcOS** | Process-oriented system | Microkernel, BPMN, Camunda integration |
+| **Generic** | Basic development setup | Standard IDE configs, memory integration |
+
+### **Standard Configuration Files**
+
+Every initialized project gets:
+- **`.cursor/mcp.json`** - MCP server configuration
+- **`.cursor/rules/`** - Project-specific Cursor rules  
+- **`.vscode/settings.json`** - VSCode configuration
+- **`.vscode/extensions.json`** - Recommended extensions
+- **`copilot-instructions.md`** - AI pair programming guidelines
+- **`.cursorrules`** - Memory usage and development guidelines
+- **`.gitignore`** - Language/framework-specific ignores
+- **`.env.example`** - Environment variable template
+- **`docker-compose.yml`** - Development infrastructure (if applicable)
+
+### **Customization**
+
+Templates can be customized by:
+1. **Modifying template files** in `templates/` directory
+2. **Adding custom rules** in `.cursor/rules/`
+3. **Project-specific overrides** during initialization
+
 ## 📋 **Repository Structure**
 
 ```
-mcp-memory-infrastructure/
-├── docker-compose.yml              # Neo4j memory service
+dev-project-init/
+├── docker-compose.yml              # Development memory service
 ├── README.md                       # This file
 ├── 
 ├── scripts/                        # Management utilities
-│   ├── init-project.sh            # Setup new projects
+│   ├── init-project.sh            # Universal project initializer
 │   ├── backup-memory.sh            # Create memory backups
 │   ├── restore-memory.sh           # Restore from backups
 │   └── check_memory.sh             # Health diagnostics
 ├── 
-├── backups/                        # Backup storage
-│   └── mcp-memory/                # Timestamped backup files
+├── templates/                      # Project templates
+│   ├── react-typescript/          # React + TypeScript template
+│   ├── node-express/               # Node.js + Express template
+│   ├── python-fastapi/             # Python + FastAPI template
+│   ├── procos/                     # ProcOS system template
+│   └── generic/                    # Basic development template
 ├── 
-├── config/                         # Configuration templates
-└── docs/                          # Additional documentation
+├── backups/                        # Backup storage
+│   └── dev-memory/                 # Development memory backups
+├── 
+├── config/                         # Base configurations
+│   ├── cursor/                     # Cursor IDE configurations
+│   ├── vscode/                     # VSCode configurations
+│   └── git/                        # Git configurations
+└── docs/                           # Additional documentation
 ```
 
 ## 🔧 **Management Commands**
@@ -262,9 +401,11 @@ open http://localhost:7475
 
 | Service | URL | Purpose |
 |---------|-----|---------|
-| **Neo4j Web UI** | http://localhost:7475 | Visual database interface |
-| **Bolt Connection** | bolt://localhost:7688 | MCP protocol connection |
-| **Authentication** | neo4j / memorypassword | Database credentials |
+| **Neo4j Web UI** | http://localhost:9475 | Visual database interface (unusual port) |
+| **Bolt Connection** | neo4j://localhost:9688 | MCP protocol connection (unusual port) |
+| **Authentication** | neo4j / devmemorypass | Database credentials |
+
+**Note**: Using unusual ports (9xxx range) to avoid conflicts with application development ports (3000-8000).
 
 ## 🎓 **How Projects Use This**
 
