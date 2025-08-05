@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# DADMS MCP Memory Restore Script
-# Restores Neo4j memory database from backup
+# Dev Project Initializer - Memory Restore Script
+# Restores Neo4j development memory database from backup
 
 set -e
 
-BACKUP_DIR="./backups/mcp-memory"
+BACKUP_DIR="./backups/dev-memory"
 
-echo "🔄 Starting MCP memory restore..."
+echo "🔄 Starting development memory restore..."
 
 # Check if backup directory exists
 if [ ! -d "$BACKUP_DIR" ]; then
@@ -17,7 +17,7 @@ fi
 
 # List available backups
 echo "📁 Available backups:"
-ls -la "$BACKUP_DIR"/mcp-memory-backup-*.cypher.gz 2>/dev/null | nl
+ls -la "$BACKUP_DIR"/*memory-backup-*.cypher.gz 2>/dev/null | nl
 
 # Get backup file to restore
 if [ -z "$1" ]; then
@@ -30,7 +30,7 @@ if [ -z "$1" ]; then
 fi
 
 if [ "$1" = "latest" ]; then
-    BACKUP_FILE=$(ls -t "$BACKUP_DIR"/mcp-memory-backup-*.cypher.gz 2>/dev/null | head -1)
+    BACKUP_FILE=$(ls -t "$BACKUP_DIR"/*memory-backup-*.cypher.gz 2>/dev/null | head -1)
     if [ -z "$BACKUP_FILE" ]; then
         echo "❌ No backup files found"
         exit 1
@@ -44,9 +44,9 @@ else
     fi
 fi
 
-# Check if Neo4j memory container is running
-if ! docker ps | grep -q "mcp-neo4j-memory"; then
-    echo "❌ Error: mcp-neo4j-memory container is not running"
+# Check if development memory container is running
+if ! docker ps | grep -q "dev-project-memory"; then
+    echo "❌ Error: dev-project-memory container is not running"
     echo "   Start it with: docker-compose up -d"
     exit 1
 fi
@@ -61,7 +61,7 @@ fi
 
 # Clear existing data
 echo "🧹 Clearing existing memory data..."
-docker exec mcp-neo4j-memory cypher-shell -u neo4j -p memorypassword \
+docker exec dev-project-memory cypher-shell -u neo4j -p devmemorypass \
     "MATCH (n) DETACH DELETE n" || {
     echo "❌ Failed to clear existing data"
     exit 1
@@ -72,11 +72,11 @@ TEMP_FILE="/tmp/restore_$(basename "$BACKUP_FILE" .gz)"
 gunzip -c "$BACKUP_FILE" > "$TEMP_FILE"
 
 # Copy backup to container
-docker cp "$TEMP_FILE" mcp-neo4j-memory:/backups/restore.cypher
+docker cp "$TEMP_FILE" dev-project-memory:/backups/restore.cypher
 
 # Restore data
 echo "📥 Restoring memory data from backup..."
-docker exec mcp-neo4j-memory cypher-shell -u neo4j -p memorypassword \
+docker exec dev-project-memory cypher-shell -u neo4j -p devmemorypass \
     --file /backups/restore.cypher || {
     echo "❌ Failed to restore backup"
     exit 1
