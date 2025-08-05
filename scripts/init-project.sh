@@ -18,8 +18,8 @@ NC='\033[0m' # No Color
 print_header() {
     echo -e "${BLUE}"
     echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║               MCP Memory Infrastructure                      ║"
-    echo "║                Project Initialization                        ║"
+    echo "║             Universal Project Initializer                   ║"
+    echo "║           Development Infrastructure Setup                   ║"
     echo "╚══════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
 }
