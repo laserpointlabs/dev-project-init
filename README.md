@@ -48,21 +48,32 @@ docker-compose up -d
 ```
 
 ### **2. Initialize a Project**
+
+#### **🚀 Enhanced Initialization (Recommended)**
 ```bash
-# For ProcOS project
-./scripts/init-project.sh procos /home/user/procos
+# Enhanced initialization with DADMS-derived configurations
+./scripts/init-project-enhanced.sh procos /home/user/procos
+./scripts/init-project-enhanced.sh my-ai-project /path/to/my-project
+```
 
-# For DADMS project  
-./scripts/init-project.sh dadms /home/user/dadms
+**Enhanced features include:**
+- **3 MCP Servers**: neo4j-memory, neo4j-cypher, huggingface-mcp
+- **7 Advanced Rules**: Development standards, architecture, testing, code quality
+- **Automatic Memory**: Intelligent storage during development
+- **Adaptive Templates**: Project-specific configurations
+- **Enterprise Standards**: DADMS-derived best practices
 
-# For any new project
+#### **📝 Basic Initialization**
+```bash
+# Basic initialization (memory only)
 ./scripts/init-project.sh my-project /path/to/my-project
 ```
 
 ### **3. Use in Cursor**
-1. Restart Cursor to load the new MCP configuration
+1. Restart Cursor to load the enhanced MCP configuration
 2. Ask the AI to remember something about your project
-3. Memories will be automatically stored in the centralized service
+3. Memories will be automatically stored with advanced rules active
+4. Benefit from automatic code quality and architecture guidance
 
 ## 🏗️ **Architecture**
 

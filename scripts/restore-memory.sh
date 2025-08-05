@@ -59,8 +59,19 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
-# Clear existing data
-echo "🧹 Clearing existing memory data..."
+# Clear existing data and indexes
+echo "🧹 Clearing existing memory data and indexes..."
+
+# Drop specific indexes that might conflict
+echo "   Dropping existing indexes..."
+docker exec dev-project-memory cypher-shell -u neo4j -p devmemorypass \
+    "DROP INDEX search IF EXISTS" 2>/dev/null || echo "   Index 'search' doesn't exist or already dropped"
+
+docker exec dev-project-memory cypher-shell -u neo4j -p devmemorypass \
+    "DROP CONSTRAINT UNIQUE_IMPORT_NAME IF EXISTS" 2>/dev/null || echo "   Constraint 'UNIQUE_IMPORT_NAME' doesn't exist or already dropped"
+
+# Then delete all nodes
+echo "   Deleting nodes..."
 docker exec dev-project-memory cypher-shell -u neo4j -p devmemorypass \
     "MATCH (n) DETACH DELETE n" || {
     echo "❌ Failed to clear existing data"
