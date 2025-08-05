@@ -51,28 +51,97 @@ docker-compose up -d
 
 ## 🏗️ **Architecture**
 
+### **Centralized MCP Memory Solution**
+
+```mermaid
+graph TB
+    subgraph "Centralized MCP Memory Solution"
+        subgraph "🐳 Infrastructure Repository"
+            REPO[mcp-memory-infrastructure]
+            REPO --> DOCKER[Docker Compose<br/>Neo4j Container]
+            REPO --> SCRIPTS[Management Scripts]
+            REPO --> INIT[Project Initialization]
+        end
+        
+        subgraph "📱 Cursor MCP Integration"
+            CURSOR[Cursor IDE] --> MCP[MCP Server]
+            MCP --> NEO[(Neo4j Memory<br/>Port 7688)]
+        end
+        
+        subgraph "🔗 Project Usage"
+            DADMS[DADMS Project]
+            PROCOS[ProcOS Project]
+            FUTURE[Future Projects]
+            
+            DADMS --> CONFIG1[.cursor/mcp.json]
+            PROCOS --> CONFIG2[.cursor/mcp.json]
+            FUTURE --> CONFIG3[.cursor/mcp.json]
+            
+            CONFIG1 -.->|points to| NEO
+            CONFIG2 -.->|points to| NEO
+            CONFIG3 -.->|points to| NEO
+        end
+        
+        subgraph "⚙️ One-Command Setup"
+            SETUP[./scripts/init-project.sh]
+            SETUP --> CONFIG1
+            SETUP --> CONFIG2
+            SETUP --> CONFIG3
+        end
+    end
+    
+    classDef infra fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
+    classDef mcp fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef projects fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef setup fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    
+    class REPO,DOCKER,SCRIPTS,INIT infra
+    class CURSOR,MCP,NEO mcp
+    class DADMS,PROCOS,FUTURE,CONFIG1,CONFIG2,CONFIG3 projects
+    class SETUP setup
 ```
-┌─────────────────────────────────────────┐
-│         MCP Memory Infrastructure        │
-├─────────────────────────────────────────┤
-│  🐳 Neo4j Container (mcp-neo4j-memory)  │
-│     • Port 7475: Web UI                 │
-│     • Port 7688: Bolt (MCP connection)  │
-│     • Persistent volumes for data       │
-│     • APOC plugins enabled              │
-└─────────────────────────────────────────┘
-                        │
-              ┌─────────┼─────────┐
-              │         │         │
-         ┌────▼───┐ ┌───▼───┐ ┌───▼─────┐
-         │ DADMS  │ │ProcOS │ │Future   │
-         │Project │ │Project│ │Projects │
-         └────────┘ └───────┘ └─────────┘
-         
-    Each project connects via Cursor MCP:
-    • .cursor/settings.json → MCP config
-    • .cursorrules → Memory guidelines  
-    • Automatic memory creation/retrieval
+
+### **Memory Data Organization**
+
+```mermaid
+graph LR
+    subgraph "Neo4j Memory Database"
+        subgraph "Project Separation"
+            P1[DADMS Memories<br/>project_id: 'dadms']
+            P2[ProcOS Memories<br/>project_id: 'procos']
+            P3[Future Memories<br/>project_id: 'future-x']
+        end
+        
+        subgraph "Memory Categories"
+            ARCH[Architecture Decisions]
+            BUGS[Bug Solutions]
+            PATTERNS[Design Patterns]
+            CONFIGS[Configuration Notes]
+        end
+        
+        subgraph "Cross-Project Links"
+            P1 -.->|references| P2
+            P2 -.->|shares solution| P3
+            P1 -.->|common pattern| P3
+        end
+    end
+    
+    subgraph "Memory Metadata"
+        META[Each Memory Node]
+        META --> PROJ[project_id]
+        META --> CAT[category]
+        META --> TIME[timestamps]
+        META --> TAGS[tags]
+        META --> CONTENT[content]
+    end
+    
+    classDef project fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef category fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef metadata fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    
+    class P1,P2,P3 project
+    class ARCH,BUGS,PATTERNS,CONFIGS category
+    class META,PROJ,CAT,TIME,TAGS,CONTENT metadata
 ```
 
 ## 📋 **Repository Structure**
@@ -113,12 +182,56 @@ docker-compose ps
 ```
 
 ### **Project Setup**
+
+The initialization script handles all configuration automatically:
+
+```mermaid
+flowchart TD
+    START([Run init-project.sh]) --> CHECK{Memory Service Running?}
+    CHECK -->|No| ERROR[❌ Error: Start service first]
+    CHECK -->|Yes| BACKUP[📋 Backup existing mcp.json]
+    
+    BACKUP --> EXISTS{mcp.json exists?}
+    EXISTS -->|Yes| HASNEO{Has neo4j-memory config?}
+    EXISTS -->|No| CREATE[📝 Create new mcp.json]
+    
+    HASNEO -->|Yes| VERIFY{Correct URL?}
+    HASNEO -->|No| ADD[➕ Add neo4j-memory config]
+    
+    VERIFY -->|Yes| SKIP[✅ Skip - already configured]
+    VERIFY -->|No| UPDATE[🔄 Update URL to localhost:7688]
+    
+    CREATE --> RULES[📋 Create .cursorrules]
+    ADD --> RULES
+    UPDATE --> RULES
+    SKIP --> RULES
+    
+    RULES --> TEST[🧪 Test connection]
+    TEST --> SUCCESS[🎉 Setup complete!]
+    
+    classDef start fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef process fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef decision fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef error fill:#ffebee,stroke:#d32f2f,stroke-width:2px
+    classDef success fill:#e8f5e8,stroke:#4caf50,stroke-width:3px
+    
+    class START,SUCCESS start
+    class BACKUP,CREATE,ADD,UPDATE,RULES,TEST process
+    class CHECK,EXISTS,HASNEO,VERIFY decision
+    class ERROR error
+    class SKIP success
+```
+
+**Usage Examples:**
 ```bash
 # Initialize new project
 ./scripts/init-project.sh <project-name> <project-path>
 
-# Example: Setup ProcOS
+# Setup ProcOS
 ./scripts/init-project.sh procos /home/user/procos
+
+# Setup DADMS  
+./scripts/init-project.sh dadms /home/user/dadms
 ```
 
 ### **Backup & Restore**

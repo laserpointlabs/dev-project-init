@@ -80,31 +80,92 @@ create_cursor_config() {
     print_step "Creating Cursor MCP configuration..."
     
     local cursor_dir="$PROJECT_DIR/.cursor"
-    local settings_file="$cursor_dir/settings.json"
+    local mcp_file="$cursor_dir/mcp.json"
     
     # Create .cursor directory
     mkdir -p "$cursor_dir"
     
-    # Create or update settings.json
-    cat > "$settings_file" << EOF
+    # Check if mcp.json already exists
+    if [ -f "$mcp_file" ]; then
+        print_step "Updating existing mcp.json configuration..."
+        
+        # Backup existing config
+        cp "$mcp_file" "$mcp_file.backup.$(date +%Y%m%d_%H%M%S)"
+        
+        # Check if neo4j-memory is already configured
+        if grep -q '"neo4j-memory"' "$mcp_file"; then
+            print_success "neo4j-memory already configured in mcp.json"
+            print_step "Verifying configuration points to centralized service..."
+            
+            # Verify the URL points to localhost:7688
+            if grep -q 'neo4j://localhost:7688' "$mcp_file"; then
+                print_success "Configuration correctly points to centralized memory service"
+            else
+                print_warning "Updating neo4j-memory URL to point to centralized service"
+                # Update the URL using sed
+                sed -i 's|"neo4j://[^"]*"|"neo4j://localhost:7688"|g' "$mcp_file"
+            fi
+        else
+            print_step "Adding neo4j-memory configuration to existing mcp.json"
+            
+            # Use jq to add the neo4j-memory configuration if available
+            if command -v jq >/dev/null 2>&1; then
+                # Add neo4j-memory to existing mcpServers
+                jq '.mcpServers["neo4j-memory"] = {
+                    "command": "uvx",
+                    "args": [
+                        "mcp-neo4j-memory",
+                        "--db-url",
+                        "neo4j://localhost:7688",
+                        "--username",
+                        "neo4j",
+                        "--password",
+                        "memorypassword"
+                    ]
+                }' "$mcp_file" > "$mcp_file.tmp" && mv "$mcp_file.tmp" "$mcp_file"
+            else
+                print_warning "jq not available - manual configuration update needed"
+                echo "Please add the following to your mcp.json mcpServers section:"
+                echo '"neo4j-memory": {'
+                echo '    "command": "uvx",'
+                echo '    "args": ['
+                echo '        "mcp-neo4j-memory",'
+                echo '        "--db-url",'
+                echo '        "neo4j://localhost:7688",'
+                echo '        "--username",'
+                echo '        "neo4j",'
+                echo '        "--password",'
+                echo '        "memorypassword"'
+                echo '    ]'
+                echo '}'
+            fi
+        fi
+    else
+        # Create new mcp.json file
+        print_step "Creating new mcp.json configuration..."
+        cat > "$mcp_file" << EOF
 {
-  "mcp.servers": {
-    "neo4j-memory": {
-      "command": "node",
-      "args": [
-        "/path/to/neo4j-mcp-server/dist/index.js"
-      ],
-      "env": {
-        "NEO4J_URI": "bolt://localhost:7688",
-        "NEO4J_USERNAME": "neo4j",
-        "NEO4J_PASSWORD": "memorypassword"
-      }
+    "\$schema": "https://json.schemastore.org/mcp.json",
+    "description": "${PROJECT_NAME} Development MCP Server Configuration with Centralized Memory",
+    "mcpServers": {
+        "neo4j-memory": {
+            "command": "uvx",
+            "args": [
+                "mcp-neo4j-memory",
+                "--db-url",
+                "neo4j://localhost:7688",
+                "--username",
+                "neo4j",
+                "--password",
+                "memorypassword"
+            ]
+        }
     }
-  }
 }
 EOF
+    fi
     
-    print_success "Created Cursor MCP configuration: $settings_file"
+    print_success "Cursor MCP configuration ready: $mcp_file"
 }
 
 create_cursor_rules() {
@@ -201,14 +262,20 @@ main() {
     
     print_success "Project initialization complete!"
     echo ""
-    echo "Next steps:"
-    echo "1. Restart Cursor to load the new MCP configuration"
-    echo "2. Test memory by asking the AI to remember something"
-    echo "3. Check memory with: cd /path/to/mcp-memory-infrastructure && ./scripts/check_memory.sh"
+    echo "✅ Configuration files updated:"
+    echo "   • .cursor/mcp.json - MCP server configuration"
+    echo "   • .cursorrules - Memory usage guidelines"
     echo ""
-    echo "Memory service URLs:"
-    echo "  • Web UI: http://localhost:7475"
-    echo "  • API: bolt://localhost:7688"
+    echo "📋 Next steps:"
+    echo "1. 🔄 Restart Cursor to load the new MCP configuration"
+    echo "2. 🧠 Test memory by asking the AI to remember something about ${PROJECT_NAME}"
+    echo "3. 🔍 Check memory status: cd /path/to/mcp-memory-infrastructure && ./scripts/check_memory.sh"
+    echo "4. 📊 View memories: http://localhost:7475 (neo4j/memorypassword)"
+    echo ""
+    echo "🌐 Memory service URLs:"
+    echo "   • Neo4j Web UI: http://localhost:7475"
+    echo "   • Bolt API: neo4j://localhost:7688"
+    echo "   • Project ID: ${PROJECT_NAME}"
 }
 
 # Run main function
