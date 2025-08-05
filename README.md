@@ -572,28 +572,28 @@ docker exec mcp-neo4j-memory cypher-shell -u neo4j -p memorypassword \
 ```mermaid
 graph TB
     subgraph "File & Project Management"
-        FILESYSTEM[mcp-filesystem<br/>File operations]
-        GIT[mcp-git<br/>Git commands]
-        GITHUB[mcp-github<br/>GitHub API]
-        PROJECT[mcp-project-manager<br/>Project scaffolding]
+        FILESYSTEM["mcp-filesystem<br/>File operations"]
+        GIT["mcp-git<br/>Git commands"]
+        GITHUB["mcp-github<br/>GitHub API"]
+        PROJECT["mcp-project-manager<br/>Project scaffolding"]
     end
     
     subgraph "Database & Data"
-        SQLITE[mcp-sqlite<br/>Local databases]
-        POSTGRES[mcp-postgres<br/>PostgreSQL queries]
-        MEMORY[mcp-neo4j-memory<br/>AI memory (current)]
+        SQLITE["mcp-sqlite<br/>Local databases"]
+        POSTGRES["mcp-postgres<br/>PostgreSQL queries"]
+        MEMORY["mcp-neo4j-memory<br/>AI memory (current)"]
     end
     
     subgraph "Development Tools"
-        DOCKER[mcp-docker<br/>Container management]
-        SHELL[mcp-shell<br/>Terminal commands]
-        BROWSER[mcp-browser-automation<br/>Web automation]
+        DOCKER["mcp-docker<br/>Container management"]
+        SHELL["mcp-shell<br/>Terminal commands"]
+        BROWSER["mcp-browser-automation<br/>Web automation"]
     end
     
     subgraph "Research & Learning"
-        SEARCH[mcp-brave-search<br/>Web search]
-        FETCH[mcp-fetch<br/>URL content]
-        YOUTUBE[mcp-youtube<br/>Video transcripts]
+        SEARCH["mcp-brave-search<br/>Web search"]
+        FETCH["mcp-fetch<br/>URL content"]
+        YOUTUBE["mcp-youtube<br/>Video transcripts"]
     end
     
     classDef current fill:#e8f5e8,stroke:#4caf50,stroke-width:3px
